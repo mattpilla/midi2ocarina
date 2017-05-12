@@ -1,3 +1,7 @@
+midi/*
+
+# Generic node gitignore shit
+######
 # Logs
 logs
 *.log
