@@ -1,0 +1,22 @@
+{
+  "name": "midi2ocarina",
+  "version": "1.0.0",
+  "description": "MIDI to playable ocarina songs in Majora's Mask",
+  "main": "midi2ocarina.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mattpilla/midi2ocarina.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mattpilla/midi2ocarina/issues"
+  },
+  "homepage": "https://github.com/mattpilla/midi2ocarina#readme",
+  "dependencies": {
+    "midi-file-parser": "^1.0.0"
+  }
+}
