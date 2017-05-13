@@ -17,5 +17,13 @@ if (!args._.length) {
     // Parse given midi
     var file = fs.readFileSync(args._[0], 'binary');
     var midi = midiFileParser(file);
-    console.log(midi.tracks);
+    // Just do the first track for now. TODO: Multiple tracks
+    let track = midi.tracks[1];
+    for (let i = 0; i < track.length; i++) {
+        let note = track[i];
+        if (note.noteNumber !== undefined && note.deltaTime) {
+            // Play a note
+            console.log(`${note.noteNumber}: ${note.deltaTime}`);
+        }
+    }
 }
