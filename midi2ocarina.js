@@ -19,13 +19,29 @@ if (!args._.length) {
     var midi = midiFileParser(file);
     // Just do the first track for now. TODO: Multiple tracks
     let track = midi.tracks[1];
+    // Collect each note and find minimum (for translation)
+    var min = 128;
+    var sequence = []; // collect each note
     for (let i = 0; i < track.length; i++) {
         let note = track[i];
-        if (note.noteNumber !== undefined && note.deltaTime) {
-            // Play a note
-            console.log(`${note.noteNumber}: ${note.deltaTime}`);
+        let number = note.noteNumber;
+        if (number !== undefined && note.deltaTime) {
+            if (number < min) {
+                min = number;
+            }
+            sequence.push({noteNumber: number});
         }
     }
+    // Translate sequence to ocarina range
+    var translation = min - ((min + 1) % 12);
+    for (let i = 0; i < sequence.length; i++) {
+        sequence[i].noteNumber -= translation;
+        if (sequence[i].noteNumber > 18) {
+            // For now, only allow songs that that can shift octaves
+            return console.log('Note range is too large: cannot translate to ocarina');
+        }
+    }
+    console.log(sequence);
 }
 
 /*
