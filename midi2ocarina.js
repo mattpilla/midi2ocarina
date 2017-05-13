@@ -27,3 +27,29 @@ if (!args._.length) {
         }
     }
 }
+
+/*
+|..|    0, -128,.........Z.Audrl.r|
+`|..|    0, ${stick},.........${Z}.${A}${cU}${cD}${cR}${cL}.${R}|`
+*/
+const ocarinaNotes = [
+    {a: true, down: true, z: true}, // B1
+    {a: true, down: true},          // C1
+    {a: true, z: true},             // C#1
+    {a: true},                      // D1
+    {a: true, r: true},             // Eb1
+    {cd: true, z: true},            // E1
+    {cd: true},                     // F1
+    {cd: true, r: true},            // F#
+    {cd: true, up: true},           // G
+    {cr: true, z: true},            // Ab
+    {cr: true},                     // A
+    {cr: true, r: true},            // Bb
+    {cl: true},                     // B2
+    {cl: true, r: true},            // C2
+    {cu: true, z: true},            // C#2
+    {cu: true},                     // D2
+    {cu: true, r: true},            // Eb2
+    {cu: true, up: true},           // E2
+    {cu: true, up: true, r: true}   // F2
+];
