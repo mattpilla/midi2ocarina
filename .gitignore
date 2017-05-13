@@ -1,4 +1,5 @@
 midi/*
+lua/*
 
 # Generic node gitignore shit
 ######
