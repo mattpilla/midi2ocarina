@@ -56,7 +56,7 @@ if (!args._.length) {
             if (number < min) {
                 min = number;
             }
-            sequence.push({noteNumber: number});
+            sequence.push({noteNumber: number, deltaTime: note.deltaTime});
         }
     }
     // Translate sequence to ocarina range and generate Lua script
@@ -68,12 +68,7 @@ if (!args._.length) {
             // For now, only allow songs that that can shift octaves
             return console.log('Note range is too large: cannot translate to ocarina');
         }
-        script += playNote(ocarinaNote);
-        script += playNote(ocarinaNote);
-        script += playNote(ocarinaNote);
-        script += playNote(ocarinaNote);
-        script += playNote(ocarinaNote);
-        script += playNote(ocarinaNote);
+        script += playNote(ocarinaNote, sequence[i].deltaTime);
     }
     // Save script in the lua folder
     var filename = 'lua/' + path.basename(args._[0]) + '.lua';
@@ -97,13 +92,14 @@ function padStick(val) {
 }
 
 // Generates Lua lines for playing the ocarina note at the given index
-function playNote(index) {
+function playNote(index, time) {
     let buttons = ['stick', 'z', 'a', 'cu', 'cd', 'cr', 'cl', 'r'];
     let input = {}; // button values for input string
     for (let i = 0; i < buttons.length; i++) {
         input[buttons[i]] = buttonChar(index, buttons[i]);
     }
-    return `
+    let note = `
 joypad.setfrommnemonicstr("|..|    0,${padStick(input.stick)},.........${input.z}.${input.a}${input.cu}${input.cd}${input.cr}${input.cl}.${input.r}|")
 emu.frameadvance()`;
+    return note.repeat(6 * time/48);
 }
