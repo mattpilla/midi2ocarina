@@ -14,6 +14,32 @@ if (!args._.length) {
         + 'midi_file\tfile to convert'
     );
 } else {
+    /*
+    |..|    0, -128,.........Z.Audrl.r|
+    `|..|    0, ${stick},.........${Z}.${A}${cU}${cD}${cR}${cL}.${R}|`
+    */
+    var ocarinaNotes = [
+        {a: 'A', z: 'Z', stick: -128},  // B1
+        {a: 'A', stick: -128},          // C1
+        {a: 'A', z: 'Z'},               // C#1
+        {a: 'A'},                       // D1
+        {a: 'A', r: 'R'},               // D#1
+        {cd: 'd', z: 'Z'},              // E1
+        {cd: 'd'},                      // F1
+        {cd: 'd', r: 'R'},              // F#
+        {cd: 'd', stick: 127},          // G
+        {cr: 'r', z: 'Z'},              // G#
+        {cr: 'r'},                      // A
+        {cr: 'r', r: 'R'},              // A#
+        {cl: 'l'},                      // B2
+        {cl: 'l', r: 'R'},              // C2
+        {cu: 'u', z: 'Z'},              // C#2
+        {cu: 'u'},                      // D2
+        {cu: 'u', r: 'R'},              // D#2
+        {cu: 'u', stick: 127},          // E2
+        {cu: 'u', r: 'R', stick: 127}   // F2
+    ];
+
     // Parse given midi
     var file = fs.readFileSync(args._[0], 'binary');
     var midi = midiFileParser(file);
@@ -32,40 +58,44 @@ if (!args._.length) {
             sequence.push({noteNumber: number});
         }
     }
-    // Translate sequence to ocarina range
+    // Translate sequence to ocarina range and generate Lua script
+    var script = '';
     var translation = min - ((min + 1) % 12);
     for (let i = 0; i < sequence.length; i++) {
-        sequence[i].noteNumber -= translation;
-        if (sequence[i].noteNumber > 18) {
+        let ocarinaNote = sequence[i].noteNumber - translation;
+        if (ocarinaNote > 18) {
             // For now, only allow songs that that can shift octaves
             return console.log('Note range is too large: cannot translate to ocarina');
         }
+        script += playNote(ocarinaNote);
     }
-    console.log(sequence);
+    console.log(script);
 }
 
-/*
-|..|    0, -128,.........Z.Audrl.r|
-`|..|    0, ${stick},.........${Z}.${A}${cU}${cD}${cR}${cL}.${R}|`
-*/
-const ocarinaNotes = [
-    {a: true, down: true, z: true}, // B1
-    {a: true, down: true},          // C1
-    {a: true, z: true},             // C#1
-    {a: true},                      // D1
-    {a: true, r: true},             // D#1
-    {cd: true, z: true},            // E1
-    {cd: true},                     // F1
-    {cd: true, r: true},            // F#
-    {cd: true, up: true},           // G
-    {cr: true, z: true},            // G#
-    {cr: true},                     // A
-    {cr: true, r: true},            // A#
-    {cl: true},                     // B2
-    {cl: true, r: true},            // C2
-    {cu: true, z: true},            // C#2
-    {cu: true},                     // D2
-    {cu: true, r: true},            // D#2
-    {cu: true, up: true},           // E2
-    {cu: true, up: true, r: true}   // F2
-];
+// Gives character for input string if button is pressed, or its default otherwise
+function buttonChar(index, button) {
+    return ocarinaNotes[index][button] ? ocarinaNotes[index][button] : '.';
+}
+
+// Pads stick direction with spaces to be 5 characters long
+function padStick(val) {
+    val = val == '.' ? 0 : val;
+    return ('     ' + val).slice(-5);
+}
+
+// Generates Lua lines for playing the ocarina note at the given index
+function playNote(index) {
+    let buttons = ['stick', 'z', 'a', 'cu', 'cd', 'cr', 'cl', 'r'];
+    let input = {}; // button values for input string
+    for (let i = 0; i < buttons.length; i++) {
+        input[buttons[i]] = buttonChar(index, buttons[i]);
+    }
+    return `
+joypad.setfrommnemonicstr("|..|    0,${padStick(input.stick)},.........${input.z}.${input.a}${input.cu}${input.cd}${input.cr}${input.cl}.${input.r}|")
+emu.frameadvance()
+emu.frameadvance()
+emu.frameadvance()
+emu.frameadvance()
+emu.frameadvance()
+emu.frameadvance()`;
+}
