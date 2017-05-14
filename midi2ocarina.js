@@ -3,6 +3,7 @@
 const minimist = require('minimist');
 const midiFileParser = require('midi-file-parser');
 const fs = require('fs');
+const path = require('path');
 const args = minimist(process.argv.slice(2));
 
 // no midi file supplied; show usage
@@ -68,8 +69,20 @@ if (!args._.length) {
             return console.log('Note range is too large: cannot translate to ocarina');
         }
         script += playNote(ocarinaNote);
+        script += playNote(ocarinaNote);
+        script += playNote(ocarinaNote);
+        script += playNote(ocarinaNote);
+        script += playNote(ocarinaNote);
+        script += playNote(ocarinaNote);
     }
-    console.log(script);
+    // Save script in the lua folder
+    var filename = 'lua/' + path.basename(args._[0]) + '.lua';
+    fs.writeFile(filename, script, err => {
+        if (err) {
+            return console.log(err);
+        }
+        console.log('Lua script generated: ' + filename);
+    });
 }
 
 // Gives character for input string if button is pressed, or its default otherwise
@@ -92,10 +105,5 @@ function playNote(index) {
     }
     return `
 joypad.setfrommnemonicstr("|..|    0,${padStick(input.stick)},.........${input.z}.${input.a}${input.cu}${input.cd}${input.cr}${input.cl}.${input.r}|")
-emu.frameadvance()
-emu.frameadvance()
-emu.frameadvance()
-emu.frameadvance()
-emu.frameadvance()
 emu.frameadvance()`;
 }
