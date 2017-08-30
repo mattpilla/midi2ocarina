@@ -38,7 +38,8 @@ if (!args._.length) {
         {cu: 'u'},                      // D2
         {cu: 'u', r: 'R'},              // D#2
         {cu: 'u', stick: 127},          // E2
-        {cu: 'u', r: 'R', stick: 127}   // F2
+        {cu: 'u', r: 'R', stick: 127},  // F2
+        {}                              // nothing
     ];
 
     // Parse given midi
@@ -56,6 +57,9 @@ if (!args._.length) {
             if (number < min) {
                 min = number;
             }
+            if (note.subtype === 'noteOn') {
+                number = '';
+            }
             sequence.push({noteNumber: number, deltaTime: note.deltaTime});
         }
     }
@@ -63,10 +67,15 @@ if (!args._.length) {
     var script = '';
     var translation = min - ((min + 1) % 12);
     for (let i = 0; i < sequence.length; i++) {
-        let ocarinaNote = sequence[i].noteNumber - translation;
-        if (ocarinaNote > 18) {
-            // For now, only allow songs that that can shift octaves
-            return console.log('Note range is too large: cannot translate to ocarina');
+        let ocarinaNote = sequence[i].noteNumber;
+        if (ocarinaNote != '') {
+            ocarinaNote -= translation;
+            if (ocarinaNote > 18) {
+                // For now, only allow songs that that can shift octaves
+                return console.log('Note range is too large: cannot translate to ocarina');
+            }
+        } else {
+            ocarinaNote = 19;
         }
         script += playNote(ocarinaNote, sequence[i].deltaTime);
     }
@@ -101,5 +110,5 @@ function playNote(index, time) {
     let note = `
 joypad.setfrommnemonicstr("|..|    0,${padStick(input.stick)},.........${input.z}.${input.a}${input.cu}${input.cd}${input.cr}${input.cl}.${input.r}|")
 emu.frameadvance()`;
-    return note.repeat(6 * time/48);
+    return note.repeat(6 * time/96);
 }
